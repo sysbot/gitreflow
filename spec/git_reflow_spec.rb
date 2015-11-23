@@ -28,6 +28,37 @@ describe GitReflow do
     })
   end
 
+  context :start do
+    subject { GitReflow.start(feature_branch) }
+
+    before do
+      allow(GitReflow).to receive(:current_branch).and_return(base_branch)
+      allow(Github).to receive(:new).and_return(github)
+      allow(GitReflow).to receive(:git_server).and_return(git_server)
+      allow(git_server).to receive(:connection).and_return(github)
+    end
+
+    context "with no feature branch provided" do
+      let(:feature_branch) { nil }
+      it { expect{ subject}.to raise_error(StandardError, "usage: git-reflow start [new-branch-name]") }
+    end
+
+    context "with blank feature branch provided" do
+      let(:feature_branch) { '' }
+      it { expect{ subject}.to raise_error(StandardError, "usage: git-reflow start [new-branch-name]") }
+    end
+
+    context 'with feature branch' do
+      it do
+        expect{ subject }.to have_run_commands_in_order [
+            "git pull origin #{base_branch}",
+            "git push origin #{base_branch}:refs/heads/#{feature_branch}",
+            "git checkout --track -b #{feature_branch} origin/#{feature_branch}"
+          ]
+      end
+    end
+  end
+
   context :status do
     subject { GitReflow.status(base_branch) }
 

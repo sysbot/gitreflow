@@ -9,6 +9,7 @@ require 'trello'
 
 require 'git_reflow/version.rb' unless defined?(GitReflow::VERSION)
 require 'git_reflow/config'
+require 'git_reflow/hooks'
 require 'git_reflow/git_server'
 require 'git_reflow/git_server/git_hub'
 require 'git_reflow/git_server/bit_bucket'
@@ -20,9 +21,28 @@ module GitReflow
   include Sandbox
   include GitHelpers
 
+  GitReflow::Hooks.overrides.each do |override_file|
+    if File.exist?(override_file)
+      load(override_file)
+      module_name = File.basename(override_file, '.rb').split("_").map {|w| w[0].upcase + w[1..-1] }.join
+      prepend self.const_get(module_name) if const_defined?(module_name)
+    end
+  end
+
   extend self
 
   LGTM = /lgtm|looks good to me|:\+1:|:thumbsup:|:shipit:/i
+
+  def start(feature_branch)
+    if "#{feature_branch}".empty?
+      raise "usage: git-reflow start [new-branch-name]"
+    else
+      run_command_with_label "git pull origin #{GitReflow.current_branch}"
+      run_command_with_label "git push origin #{GitReflow.current_branch}:refs/heads/#{feature_branch}"
+      run_command_with_label "git checkout --track -b #{feature_branch} origin/#{feature_branch}"
+
+    end
+  end
 
   def status(destination_branch)
     pull_request = git_server.find_open_pull_request( :from => current_branch, :to => destination_branch )

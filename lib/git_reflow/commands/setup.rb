@@ -14,6 +14,8 @@ command :setup do |c|
       !GitReflow::Config.get('github.oauth-token').empty?
     )
 
+    GitReflow::Hooks.run(:before_setup)
+
     unless reflow_already_setup
       choose do |menu|
         menu.header = "Available remote Git Server services:"
@@ -24,25 +26,6 @@ command :setup do |c|
       end
     end
 
-    if options[:"use-trello"] or options[:trello]
-      if GitReflow::Config.get('trello.api-key').length <= 0
-        GitReflow.say "Visit: https://trello.com/app-key"
-        trello_key = ask("Enter your Developer API Key found on the URL above: ")
-        GitReflow.say "Visit: https://trello.com/1/authorize?key=#{trello_key}&response_type=token&expiration=never&scope=read,write&name=GitReflow"
-        trello_member_key = ask("Enter your Member Token generated from the URL above: ")
-      end
-
-      GitReflow.setup_trello
-
-      # Ensure defaults are setup
-      GitReflow::Config.set('trello.next-list-id', 'Next', local: true)
-      GitReflow::Config.set('trello.current-list-id', 'In Progress', local: true)
-      GitReflow::Config.set('trello.staged-list-id', 'Staged', local: true)
-      GitReflow::Config.set('trello.approved-list-id', 'Approved', local: true)
-      GitReflow::Config.set('trello.completed-list-id', 'Live', local: true)
-
-      board_for_this_project = ask("Enter the name of the Trello board for this project: ")
-      GitReflow::Config.set('trello.board-id', board_for_this_project.downcase, local: true)
-    end
+    GitReflow::Hooks.run(:after_setup)
   end
 end

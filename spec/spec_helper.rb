@@ -23,13 +23,13 @@ RSpec.configure do |config|
     c.syntax = [:should, :expect]
   end
 
-  config.before(:each) do
+  config.before(:example) do
     WebMock.reset!
     stub_command_line
     allow_message_expectations_on_nil
   end
 
-  config.after(:each) do
+  config.after(:example) do
     WebMock.reset!
     reset_stubbed_command_line
   end

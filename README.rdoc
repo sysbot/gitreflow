@@ -246,7 +246,7 @@ This is what the default commit message looks like:
   Author: Nicholas Hance <nhance@reenhanced.com>
   Date:   Thu Jul 11 15:33:29 2013 -0400
   ...
-  
+
 ==== How it works
 This is what we do behind the scenes when you do +deliver+
 
@@ -322,6 +322,66 @@ http://reenhanced.com/images/reflow.png
 
   git config --global --add "reflow.always-deploy-and-cleanup" "true"
 
+== Hooks and Overrides
+
+  Need to customize the workflow to better suit yours?  We provide two ways to accomplish this:
+
+=== 1. Hooks
+
+We consider hooks to be ruby files that you want run either _before_ or _after_ certain steps in the workflow. These hooks can be any of the following:
+
+  `before_setup`, `after_setup`, `before_start`, `after_start`, `before_review`, `after_review`, `before_deliver`, `after_deliver`
+
+Hooks can be installed by simply adding the full path to a file to be run in
+your git config using the key `reflow.hooks.before-setup`, where `before-setup`
+is the name of the hook you want to run (note the dash is used in the config instead of the underscore).
+
+Multiple files can be given for any of the hooks, and these files get run in the
+order they are listed in your git config.  You can run `git config --get-all
+reflow.hooks.before-setup` as an example to see the full list and order that
+your `before-setup` hooks will run.
+
+=== 2. Overrides
+
+*Overrides* can be used to replace existing behavior within GitReflow. In order
+to accomplish this we ask that you define a module with the methods you would
+like to override.
+
+As an example, if you wanted to override how your feature
+branch is merged down so that it does a direct merge (as opposed to the default
+squash-merge), you would do the following:
+
+1. Create a file called `git_reflow_direct_merge.rb` with the following
+contents:
+
+  Note: When creating your override, you'll want to start by copying the
+[existing method from our source](https://github.com/reenhanced/gitreflow/blob/master/lib/git_reflow/git_helpers.rb#L45).
+
+
+```ruby
+module GitReflowDirectMerge
+  def merge_feature_branch(feature_branch_name, options = {})
+    options[:destination_branch] ||= 'master'
+
+    message = "#{options[:message]}"
+
+    if "#{options[:pull_request_number]}".length > 0
+      message << "\nCloses ##{options[:pull_request_number]}\n"
+    end
+
+    if lgtm_authors = Array(options[:lgtm_authors]) and lgtm_authors.any?
+      message << "\nLGTM given by: @#{lgtm_authors.join(', @')}\n"
+    end
+
+    run_command_with_label "git checkout #{options[:destination_branch]}"
+    run_command_with_label "git merge #{feature_branch_name}"
+
+    append_to_squashed_commit_message(message) if message.length > 0
+  end
+end
+```
+
+Any method defined in the `GitHelpers` module can be overriden.
 
 ---
 

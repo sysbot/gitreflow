@@ -112,9 +112,9 @@ We assume you know what you're doing, so if you need something different, do it 
 
 After making commits to your branch, run +review+. Didn't push it up? We don't care, we'll do it for you.
 
-If you do not pass the title or message options to the review command, you will be given an editor to write your PR request in, similar to `git commit`. The first line is the title, the rest is the body. 
+If you do not pass the title or message options to the review command, you will be given an editor to write your PR request in, similar to `git commit`. The first line is the title, the rest is the body.
 
-  $ git reflow review         
+  $ git reflow review
 
   Review your PR:
   --------
@@ -140,7 +140,7 @@ If you do not pass the title or message options to the review command, you will 
 [OSX/Ubuntu only]  You can automatically open your default web browser to the pull request.
                    This lets you edit the pull request with all of the detailed information you'll need before submitting it to your team.
 
-We output the pull request URL so you can distribute it to your team without leaving the terminal. 
+We output the pull request URL so you can distribute it to your team without leaving the terminal.
 
 ==== How it works
 Behind the scenes, this is how +review+ works:
@@ -223,27 +223,27 @@ This is what it looks like:
 
   Deleted branch nh-fail-without-lgtm (was f90e111).
   Nice job buddy.
-  
+
 This is what the default commit message looks like:
   Enforces LGTM before deliver, even with no comments.
   Removes the need to review the pull request yourself if you make a
   comment.
-  
+
   Better error message if setup fails.
-  
+
   Bug fixes.
-  
+
   Closes #36
-  
+
   LGTM given by: @codenamev
-  
+
   Squashed commit of the following:
-  
+
   commit f90e111
   Author: Nicholas Hance <nhance@reenhanced.com>
   Date:   Thu Jul 11 15:33:29 2013 -0400
   ...
-  
+
 ==== How it works
 This is what we do behind the scenes when you do +deliver+
 
@@ -254,7 +254,7 @@ This is what we do behind the scenes when you do +deliver+
 * Has the review been completed? Did we get a +LGTM+ from everyone who's participated?
 
   If not, show a list of authors that need to provide a +LGTM+.
-  
+
 If the review is done, it's time to merge. Here's what happens:
 
 First, update our local +master+ so we don't get conflicts
@@ -263,18 +263,18 @@ First, update our local +master+ so we don't get conflicts
 
 Next, squash merge our feature branch
   git merge --squash nh-branch-name
-  
+
 Now, we'll apply a little magic so we have a great commit message by default. Your editor will open and you'll see a nice default for your commit message based on the pull request body.
 
 Once you've saved the commit, prompt the user to see if we should continue
   Merge complete!
   Would you like to push this branch to your remote repo and cleanup your feature branch?
-  
+
 If 'y', then we'll push to +master+ and delete the feature branch
   git push origin master
   git push origin :nh-branch-name
   git branch -D nh-branch-name
-  
+
 If 'n', then just stop here. The user can reset his local +master+.
 
 And we're done.
@@ -319,6 +319,9 @@ http://reenhanced.com/images/reflow.png
 
   git config --global --add "reflow.always-deploy-and-cleanup" "true"
 
+  You can also skip prompting for 'open in browser?' message
+  git config --global --add "reflow.ask-open-in-browser" "false"
+
 
 ---
 
@@ -329,6 +332,7 @@ Authors:
 * @codenamev
 * @armyofgnomes
 * @nhance
+* @sysbot
 
 Built by Reenhanced:
 http://www.reenhanced.com

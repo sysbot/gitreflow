@@ -32,7 +32,7 @@ module GitReflow
     else
       puts "Here's the status of your review:"
       pull_request.display_pull_request_summary
-      ask_to_open_in_browser(pull_request.html_url)
+      GitReflow::Config.get('reflow.ask-open-in-browser') ? ask_to_open_in_browser(pull_request.html_url) : false
     end
   end
 
@@ -47,7 +47,7 @@ module GitReflow
       if existing_pull_request
         puts "A pull request already exists for these branches:"
         existing_pull_request.display_pull_request_summary
-        ask_to_open_in_browser(existing_pull_request.html_url)
+        GitReflow::Config.get('reflow.ask-open-in-browser') ? ask_to_open_in_browser(existing_pull_request.html_url) : false
       else
         pull_request = git_server.create_pull_request(title: options['title'],
                                                       body:  options['body'],
@@ -55,7 +55,7 @@ module GitReflow
                                                       base:  options['base'])
 
         puts "Successfully created pull request ##{pull_request.number}: #{pull_request.title}\nPull Request URL: #{pull_request.html_url}\n"
-        ask_to_open_in_browser(pull_request.html_url)
+        GitReflow::Config.get('reflow.ask-open-in-browser') ? ask_to_open_in_browser(pull_request.html_url) : false
       end
     rescue Github::Error::UnprocessableEntity => e
       puts "Github Error: #{e.to_s}"
